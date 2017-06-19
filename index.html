@@ -1,0 +1,412 @@
+<!DOCTYPE HTML>
+    <html>
+    
+        <head>
+        <style>
+            button{
+                font-size: 15px; 
+            }
+            span{
+                font-size: 25px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            
+            table, th, td {
+                border: 1px solid black;
+                table-layout: fixed;
+            }
+            td{
+                size: 25%;
+            }
+
+        </style>
+    
+        <title>Kings in the Corner</title>
+        </head>
+        <body>
+            <div>
+                <button onclick = "nextCard()"> Deal Card </button> <button style ="float:right"  onclick = "resetGame()">New Game </button> <br />
+                Cards Remaining: <span id = "cardsLeft"> </span> <br />
+                Current Card:    <span id = "currentCard"> </span> <br />
+            </div>
+            <div id = "board" style = "text-align:center">
+                <table align = "center">
+                    <tr>
+                        <td><span id = "1" >   No Card</span><br /><button onclick = "moveCard(1)"  >Select Cell</button></td>
+                        <td><span id = "2" >   No Card</span><br /><button onclick = "moveCard(2)"  >Select Cell</button></td>
+                        <td><span id = "3" >   No Card</span><br /><button onclick = "moveCard(3)"  >Select Cell</button></td>
+                        <td><span id = "4" >   No Card</span><br /><button onclick = "moveCard(4)"  >Select Cell</button></td>
+                    </tr> 
+                    <tr> 
+                        <td><span id = "5" >   No Card</span><br /><button onclick = "moveCard(5)"  >Select Cell</button></td>
+                        <td><span id = "6" >   No Card</span><br /><button onclick = "moveCard(6)"  >Select Cell</button></td>
+                        <td><span id = "7" >   No Card</span><br /><button onclick = "moveCard(7)"  >Select Cell</button></td>
+                        <td><span id = "8" >   No Card</span><br /><button onclick = "moveCard(8)"  >Select Cell</button></td>
+                    </tr>
+                    <tr>
+                        <td><span id = "9"  >  No Card</span><br /><button onclick = "moveCard(9)"  >Select Cell</button></td>
+                        <td><span id = "10" >  No Card</span><br /><button onclick = "moveCard(10)" >Select Cell</button></td>
+                        <td><span id = "11" >  No Card</span><br /><button onclick = "moveCard(11)" >Select Cell</button></td>
+                        <td><span id = "12" >  No Card</span><br /><button onclick = "moveCard(12)" >Select Cell</button></td>
+                    </tr>
+                    <tr>
+                        <td><span id = "13" >  No Card</span><br /><button onclick = "moveCard(13)" >Select Cell</button></td>
+                        <td><span id = "14" >  No Card</span><br /><button onclick = "moveCard(14)" >Select Cell</button></td>
+                        <td><span id = "15" >  No Card</span><br /><button onclick = "moveCard(15)" >Select Cell</button></td>
+                        <td><span id = "16" >  No Card</span><br /><button onclick = "moveCard(16)" >Select Cell</button></td>
+                    </tr>
+            <table>
+                
+    
+
+    
+    
+    
+    
+               
+                <br />
+            </div>
+            <div id = "console">
+                Console: <br />
+            </div>
+
+            <script>
+                var corners = [1, 4, 13, 16];
+                var queenSlots = [2, 3, 14, 15];
+                var jackSlots = [5, 8, 9, 12];
+                var board = [new cell(), new cell(), new cell(), new cell(), new cell(), new cell(), new cell(), new cell(), new cell(), new cell(), new cell(), new cell(), new cell(), new cell(), new cell(), new cell(), new cell()];
+                var cardsOnBoard = 0;
+                var dealtCard = false;
+                var cardInPlay;
+                var deck;
+                var gameOver = false;
+                var removalPhase = false;
+                var removalsLeft;
+                var firstClick = true;
+                var firstCell;
+                var secondCell;
+                function cell(){
+                    this.card = null;
+                    this.locked = false;
+                }
+                function Card(suit, value){
+                        this.suit = suit;
+                        this.value = value;
+                        this.getSuit = function(){
+                            return this.suit;
+                        };
+                        this.getValue = function(){
+                            return this.value;
+                        };
+                        this.print= function(){
+                            var returnString = "";
+                            if(this.value === 11){
+                                returnString += "Jack";
+                            }else if(this.value === 12){
+                                returnString += "Queen";
+                            }else if(this.value === 13){
+                                returnString += "King";
+                            }else if(this.value === 1){
+                                returnString += "Ace";
+                            }else{
+                                returnString += this.value;
+                            }
+                            returnString += " Of ";
+                            if(this.suit === 1){
+                                returnString += "Diamond";
+                            }else if(this.suit === 2){
+                                returnString += "Club";
+                            }else if(this.suit === 3){
+                                returnString += "Heart";
+                            }else if(this.suit === 4){
+                                returnString += "Spade";
+                            }
+                            return returnString;
+                        };
+                }
+                function Deck(){
+                    this.cards = new Array();
+                    this.numCards = 52;                      
+                    for(var i = 1 ;i < 5; i++){
+                        for(var j = 1; j < 14; j++){
+                            
+                            this.cards.push(new Card(i, j));
+                        }
+                    };
+                    this.print = function(){
+                        for(var i = 0; i < 52; i++){
+                            document.getElementById("console").innerHTML += this.cards[i].print() + "<br />";
+                        }
+                    };
+                    this.shuffle = function(){
+                        var j, x, i;
+                        for(i = this.cards.length; i; i--){
+                            j = Math.floor(Math.random() * i);
+                            x = this.cards[i-1];
+                            this.cards[i-1] = this.cards[j];
+                            this.cards[j] = x;
+                        }
+                    };
+                    this.dealCard = function(){
+                        if(dealtCard === false && gameOver === false){
+                            if(removalPhase === true){
+                                return;
+                            }else{
+                                cardInPlay = this.cards[this.numCards-1];
+                                document.getElementById("currentCard").innerHTML = this.cards[this.numCards-1].print();
+                                document.getElementById("cardsLeft").innerHTML = this.numCards;
+                                dealtCard = true;
+                                if(isFull()){
+                                    document.getElementById("console").innerHTML = "Removal Phase";
+                                    dealtCard = true;
+                                    removalPhase = true;
+                                    removalsLeft = numRemovals();
+                                    return;
+                                }
+                                if(cardInPlay.getValue() === 13){
+                                    if(available(corners) === false){
+                                        document.getElementById("console").innerHTML = "Game Over";
+                                        gameOver = true;
+                                    }
+                                } else if(cardInPlay.getValue() === 12){
+                                    if(available(queenSlots) === false){
+                                        document.getElementById("console").innerHTML = "Game Over";
+                                        gameOver = true;
+                                    }
+                                } else if(cardInPlay.getValue() === 11){
+                                    if(available(jackSlots) === false){
+                                        document.getElementById("console").innerHTML = "Game Over";
+                                        gameOver = true;
+                                    }
+                                }
+                            }
+                               
+                        }
+
+                        
+                    };
+                };
+                function win(){
+                    for(var i = 0; i < corners.length; i++){
+                        if(board[corners[i]].locked !== true){
+                            return false;
+                        }
+                    }
+                    for(var i = 0; i < queenSlots.length; i++){
+                        if(board[queenSlots[i]].locked !== true){
+                            return false;
+                        }
+                    }
+                    for(var i = 0; i < queenSlots.length; i++){
+                        if(board[queenSlots[i]].locked !== true){
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+
+                function startGame(){
+                    deck = new Deck();
+                    deck.shuffle();
+                    gameOver = false;
+                };
+                function resetGame(){
+                    for(var i = 1; i < board.length; i++){
+                        board[i].card = null;
+                        board[i].locked = false;
+                         document.getElementById(i).innerHTML = "No Card";
+                         document.getElementById(i).style.color = "black";
+                    }
+                    cardsOnBoard = 0;
+                    dealtCard = false;
+                    gameOver = false;
+                    removalPhase = false;
+                    firstClick = true;
+                    startGame();
+                }
+                function nextCard(){
+                    deck.dealCard();
+                };
+                function isFull(){
+                    return (cardsOnBoard === 16);
+                };
+                function available(slots){
+                    for(var i = 0; i < slots.length; i++){
+                        if(board[slots[i]].card === null)
+                            return true;
+                    }
+                    return false;
+                };
+                function numRemovals(){
+                    var retVal = 0;
+                    var slotsToCheck = [null];
+                    var checked = 1;
+                    for(var i = 1; i < 17; i++){
+                        if(board[i].locked === false){
+                            slotsToCheck.push([i, false]);
+                        }
+                    }
+                    document.getElementById("console").innerHTML = slotsToCheck;
+                    for(var i = 1; i < slotsToCheck.length; i++){
+                        if(slotsToCheck[i][checked] === true){
+                            continue;
+                        }else{
+                            for(var j = 1; j < slotsToCheck.length; j++){
+                                if(i === j || slotsToCheck[j][checked] === true){
+                                    continue;
+                                }else if(board[slotsToCheck[i][0]].card.getValue() === 10 && slotsToCheck[i][checked] === false){
+                                    slotsToCheck[i][checked] = true;
+                                    retVal++;
+                                }else if(board[slotsToCheck[j][0]].card.getValue() === 10 && slotsToCheck[j][checked] === false){
+                                    slotsToCheck[j][checked] = true;
+                                    retVal++;
+                                }else if(board[slotsToCheck[i][0]].card.getValue() + board[slotsToCheck[j][0]].card.getValue() === 10 && slotsToCheck[i][checked] === false && slotsToCheck[j][checked] === false){
+                                    slotsToCheck[j][checked] = true;
+                                    slotsToCheck[i][checked] = true;
+                                    retVal++;
+                                }
+                            }
+                        }
+                            
+                    }
+                    return retVal; 
+                };
+                function moveCard(cellNumber){
+                    if(dealtCard === true && isFull() === false &&  board[cellNumber].card === null && removalPhase === false){
+                        if(cardInPlay.value === 13){
+                            for(var i = 0; i < corners.length; i++){
+                                if(cellNumber === corners[i]){
+                                    document.getElementById("console").innerHTML = "Inside For Looop IF";
+                                    document.getElementById(corners[i]).innerHTML = cardInPlay.print();
+                                    deck.cards.pop();
+                                    deck.numCards--;
+                                    dealtCard = false;
+                                    document.getElementById("currentCard").innerHTML = "";
+                                    document.getElementById("cardsLeft").innerHTML = deck.numCards;
+                                    board[cellNumber].card = cardInPlay;
+                                    if(cellNumber === 1 || cellNumber === 4 || cellNumber === 13 || cellNumber === 16){
+                                          board[cellNumber].locked =true;
+                                    }
+                                    cardsOnBoard++;
+                                    if(win()){
+                                        
+                                        document.getElementById("console").innerHTML= "You have won!";
+                                    }
+                                    return;
+                                }
+                            }
+                            document.getElementById("console").innerHTML = "Kings can only go in Corners";
+                            return;
+                        }else if(cardInPlay.value === 12){
+                            for(var i = 0; i < queenSlots.length; i++){
+                                if(cellNumber === queenSlots[i]){
+                                    document.getElementById(queenSlots[i]).innerHTML = cardInPlay.print();
+                                    deck.cards.pop();
+                                    deck.numCards--;
+                                    dealtCard = false;
+                                    document.getElementById("currentCard").innerHTML = "";
+                                    document.getElementById("cardsLeft").innerHTML = deck.numCards;
+                                    board[cellNumber].card = cardInPlay;
+                                    if(cellNumber === 2 || cellNumber === 3 || cellNumber === 14 || cellNumber === 15){
+                                          board[cellNumber].locked = true;
+                                    }
+                                    cardsOnBoard++;
+                                     if(win()){
+                                        
+                                        document.getElementById("console").innerHTML= "You have won!";
+                                    }
+                                    return;
+                                }
+                            }
+                            document.getElementById("console").innerHTML = "Queens can only go in the Top and Bottom Middle Slots";
+                            return;
+                        }else if(cardInPlay.value === 11){
+                            for(var i = 0; i < jackSlots.length; i++){
+                                if(cellNumber === jackSlots[i]){
+                                    document.getElementById(jackSlots[i]).innerHTML = cardInPlay.print();
+                                    deck.cards.pop();
+                                    deck.numCards--;
+                                    dealtCard = false;
+                                    document.getElementById("currentCard").innerHTML = "";
+                                    document.getElementById("cardsLeft").innerHTML = deck.numCards;
+                                    board[cellNumber].card = cardInPlay;
+                                    if(cellNumber === 5 || cellNumber === 8 || cellNumber === 9 || cellNumber === 12){
+                                        board[cellNumber].locked =true;
+                                    }
+                                    cardsOnBoard++;
+                                     if(win()){
+                                        
+                                        document.getElementById("console").innerHTML= "You have won!";
+                                    }
+                                    return;
+                                }
+                            }
+                            document.getElementById("console").innerHTML = "Jacks can only go in the Left and Right Middle Slots"
+                            return;
+                        }
+                        else{
+                            document.getElementById("console").innerHTML = "Inside Else";
+                            document.getElementById(cellNumber).innerHTML = cardInPlay.print();
+                            dealtCard = false;
+                            deck.cards.pop();
+                            deck.numCards--;
+                            document.getElementById("currentCard").innerHTML = "";
+                            document.getElementById("cardsLeft").innerHTML = deck.numCards;
+                            board[cellNumber].card = cardInPlay;
+                            cardsOnBoard++;
+
+                            return;
+                        }
+                        
+                    }
+                    else if(removalPhase === true){
+                        if(board[cellNumber].card.getValue() === 10){
+                            board[cellNumber].card = null;
+                            document.getElementById(cellNumber).innerHTML = "No Card";
+                            removalsLeft--;
+                            cardsOnBoard--;
+                        }
+                        else if(firstClick === true){
+                            firstCell = cellNumber;
+                            firstClick = false;
+                            document.getElementById(cellNumber).style.color = "cornflowerblue";
+                        }else if(firstClick === false){
+                            if(board[firstCell].card.getValue() + board[cellNumber].card.getValue() === 10){
+                                board[cellNumber].card = null;
+                                document.getElementById(cellNumber).innerHTML = "No Card";
+                                document.getElementById(cellNumber).style.color = "black";
+                                board[firstCell].card = null;
+                                document.getElementById(firstCell).innerHTML = "No Card";
+                                 document.getElementById(firstCell).style.color = "black";
+                                removalsLeft--;
+                                firstClick = true;
+                                cardsOnBoard--;
+                                cardsOnBoard--;
+                                
+                            }else{
+                                document.getElementById("console").innerHTML = "Invalid removal";
+                                document.getElementById(firstCell).style.color = "black";
+                                firstCell = null;
+                                firstClick = true;
+                             }
+                        }
+                        document.getElementById("console").innerHTML += "<br />" + removalsLeft;
+                        if(removalsLeft === 0){
+                            removalPhase = false;
+
+                            document.getElementById("console").innerHTML = "removal phase over"; 
+                            return;
+                        }
+                        return;
+                    }
+                };
+
+                startGame();                
+                
+            </script>    
+            
+        </body>
+    </html>
