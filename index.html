@@ -68,9 +68,31 @@
     
                
                 <br />
-            </div>
-            <div id = "console">
+            </div> 
+            <div>
                 Console: <br />
+            </div>
+            <div id = "console" style = "height:125px">
+               
+            </div>
+            <div id = "rules">
+                    Rules: <br />
+                <p>
+                    <span style = "font-size:14pt"> Objective: Get the Kings, Queens, and Jacks in the Correct Position. </span>
+                        <br />
+                        Kings in the Corner. <br />
+                        Queens at the Bottom and Top Middle. <br />
+                        Jacks on the Left and Right Middle. <br />
+                        Game has Two Phases: <br />
+                        Phase 1: <br />
+                            One card will be dealt at a time for the player to put on the board. <br />
+                            When the board is full, the game goes to Phase 2. <br />
+                            If a card comes out without a valid position (i.e King comes out but there are no corners left) the game is over. <br />
+                        Phase 2: <br />
+                            Phase 2 is indicated when Removal Phase is written in the console. <br />
+                            Cards can be removed if the two cards add up to exactly 10 or a 10 is selected.(i.e 4 and a 6). <br />
+                            Once all valid combinations are removed, the game will return to Phase 1.
+                </p>
             </div>
 
             <script>
@@ -160,25 +182,26 @@
                                 document.getElementById("cardsLeft").innerHTML = this.numCards;
                                 dealtCard = true;
                                 if(isFull()){
-                                    document.getElementById("console").innerHTML = "Removal Phase";
+                                    
                                     dealtCard = true;
                                     removalPhase = true;
                                     removalsLeft = numRemovals();
+                                    document.getElementById("console").innerHTML = "Removal Phase" + <br /> + "Removals Left: " + removalsLeft;
                                     return;
                                 }
                                 if(cardInPlay.getValue() === 13){
                                     if(available(corners) === false){
-                                        document.getElementById("console").innerHTML = "Game Over";
+                                        window.alert("Game Over. Better luck next time!");
                                         gameOver = true;
                                     }
                                 } else if(cardInPlay.getValue() === 12){
                                     if(available(queenSlots) === false){
-                                        document.getElementById("console").innerHTML = "Game Over";
+                                        window.alert("Game Over. Better luck next time!");
                                         gameOver = true;
                                     }
                                 } else if(cardInPlay.getValue() === 11){
                                     if(available(jackSlots) === false){
-                                        document.getElementById("console").innerHTML = "Game Over";
+                                        window.alert("Game Over. Better luck next time!");
                                         gameOver = true;
                                     }
                                 }
@@ -212,6 +235,7 @@
                     deck = new Deck();
                     deck.shuffle();
                     gameOver = false;
+                    document.getElementById("console").innerHTML = "Phase 1";
                 };
                 function resetGame(){
                     for(var i = 1; i < board.length; i++){
@@ -249,7 +273,6 @@
                             slotsToCheck.push([i, false]);
                         }
                     }
-                    document.getElementById("console").innerHTML = slotsToCheck;
                     for(var i = 1; i < slotsToCheck.length; i++){
                         if(slotsToCheck[i][checked] === true){
                             continue;
@@ -279,7 +302,7 @@
                         if(cardInPlay.value === 13){
                             for(var i = 0; i < corners.length; i++){
                                 if(cellNumber === corners[i]){
-                                    document.getElementById("console").innerHTML = "Inside For Looop IF";
+                                    //document.getElementById("console").innerHTML = "Inside For Looop IF";
                                     document.getElementById(corners[i]).innerHTML = cardInPlay.print();
                                     deck.cards.pop();
                                     deck.numCards--;
@@ -339,7 +362,7 @@
                                     cardsOnBoard++;
                                      if(win()){
                                         
-                                        document.getElementById("console").innerHTML= "You have won!";
+                                        window.alert("You win!");
                                     }
                                     return;
                                 }
@@ -348,7 +371,7 @@
                             return;
                         }
                         else{
-                            document.getElementById("console").innerHTML = "Inside Else";
+                            //document.getElementById("console").innerHTML = "Inside Else";
                             document.getElementById(cellNumber).innerHTML = cardInPlay.print();
                             dealtCard = false;
                             deck.cards.pop();
@@ -368,6 +391,7 @@
                             document.getElementById(cellNumber).innerHTML = "No Card";
                             removalsLeft--;
                             cardsOnBoard--;
+                            document.getElementById("console").innerHTML += "<br />" + "Removals Left" + removalsLeft;
                         }
                         else if(firstClick === true){
                             firstCell = cellNumber;
@@ -385,19 +409,18 @@
                                 firstClick = true;
                                 cardsOnBoard--;
                                 cardsOnBoard--;
-                                
+                                document.getElementById("console").innerHTML += "<br />" + "Removals Left: " + removalsLeft;
                             }else{
-                                document.getElementById("console").innerHTML = "Invalid removal";
+                                document.getElementById("console").innerHTML += "Invalid removal";
                                 document.getElementById(firstCell).style.color = "black";
                                 firstCell = null;
                                 firstClick = true;
                              }
                         }
-                        document.getElementById("console").innerHTML += "<br />" + removalsLeft;
                         if(removalsLeft === 0){
                             removalPhase = false;
 
-                            document.getElementById("console").innerHTML = "removal phase over"; 
+                            document.getElementById("console").innerHTML = "Removal Phase Over"; 
                             return;
                         }
                         return;
